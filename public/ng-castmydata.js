@@ -1,7 +1,7 @@
 (function() {
 
     angular.module('NgCastMyData', [])
-        .value('CastMyDataServer', 'http://localhost:8080')
+        .value('CastMyDataServer', '')
         .factory('NgCastMyDataEndpoint', ['CastMyDataServer', function(CastMyDataServer) {
         
             var each = function(obj, callback) {
