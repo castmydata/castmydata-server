@@ -128,10 +128,11 @@
         socket.path = path;
 
         socket.on('records', function(data) {
-            models = data.map(function(model) {
+            models.splice(0, models.length);
+            var datas = data.forEach(function(model) {
                 model = new Model(that, model);
                 model.emit('post', model);
-                return model;
+                models.push(model);
             });
             that.emit('records', models);
         });
@@ -167,7 +168,9 @@
             }
         });
 
-        socket.emit('join', path);
+        socket.on('connect', function(){
+            socket.emit('join', path);
+        })
     };
 
     Endpoint.prototype = Object.create(Eev.prototype);
