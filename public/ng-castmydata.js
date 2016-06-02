@@ -21,10 +21,10 @@
                     var datas = $scope[param] = [];
 
                     this.on('records', function(models) {
+                        datas.splice(0, datas.length);
                         models.forEach(function(data) {
                             datas.push(data);
                         });
-
                     });
 
                     this.on('post', function(data) {
