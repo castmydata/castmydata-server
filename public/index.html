@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CastMyData</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
+    <script src="/castmydata.min.js"></script>
+    <script src="/ng-castmydata.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
+    <style>
+        .list-group-item {
+            min-height: 56px;
+        }
+        .animate-container {
+            background:white;
+            list-style:none;
+            margin:0;
+        }
+
+        .animate-repeat {
+            line-height:30px;
+            list-style:none;
+            box-sizing:border-box;
+        }
+
+        .animate-repeat.ng-move,
+        .animate-repeat.ng-enter,
+        .animate-repeat.ng-leave {
+            transition:all linear 0.2s;
+        }
+
+        .animate-repeat.ng-leave.ng-leave-active,
+        .animate-repeat.ng-move,
+        .animate-repeat.ng-enter {
+            opacity:0;
+            max-height:0;
+        }
+
+        .animate-repeat.ng-leave,
+        .animate-repeat.ng-move.ng-move-active,
+        .animate-repeat.ng-enter.ng-enter-active {
+            opacity:1;
+            max-height:30px;
+        }
+    </style>
+    <script>
+        angular.module('sample', ['NgCastMyData', 'ngAnimate'])
+            .value('CastMyDataServer', 'http://localhost:8080')
+            .controller('TodosController', function($scope, NgCastMyDataEndpoint){
+
+                // create new connection
+                var endpoint = NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
+
+                $scope.post = function(params) {
+
+                    // send the data to the server
+                    endpoint.post(params);
+
+                    // clear the name variable
+                    $scope.name = '';
+                }
+
+                $scope.href = window.location.href;
+            });
+    </script>
+</head>
+<body ng-app="sample">
+    <div ng-controller="TodosController" class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <h1>CastMyData</h1>
+                <p class="lead">Realtime database in one line.</p>
+                <code>
+                    var endpoint = NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
+                    // that's it!
+                </code>
+                <hr>
+                <h2>Scripts</h2>
+                <dl>
+                    <dt>castmydata.js:</dt>
+                    <dd>&lt;script type=&quot;text/javascript&quot; src=&quot;{{href}}castmydata.js&quot;&gt;&lt;/script&gt;</dd>
+                    <dd>&lt;script type=&quot;text/javascript&quot; src=&quot;{{href}}castmydata.js&quot;&gt;&lt;/script&gt;</dd>
+                    <dt>ng-castmydata.js:</dt>
+                    <dd>(To use CastMyData with Angular 1)</dd>
+                    <dd>&lt;script type=&quot;text/javascript&quot; src=&quot;{{href}}ng-castmydata.js&quot;&gt;&lt;/script&gt;</dd>
+                    <dd>&lt;script type=&quot;text/javascript&quot; src=&quot;{{href}}ng-castmydata.min.js&quot;&gt;&lt;/script&gt;</dd>
+                </dl>
+                <hr>
+                <h2>Example: Todos</h2>
+                <p><a href="{{href}}" target="_blank">Open Another Tab</a></p>
+                <ul class="list-group animate-container">
+                    <li ng-repeat="record in records" class="list-group-item animate-repeat">
+                        <div class="btn-group pull-right">
+                            <button class="btn btn-danger" ng-click="record.delete()">
+                                <i class="glyphicon glyphicon-remove"></i>
+                            </button>
+                            <button class="btn btn-info" ng-click="$parent.editing = record">
+                                <i class="glyphicon glyphicon-edit"></i>
+                            </button>
+                        </div>
+                        &nbsp;&nbsp;{{record.name}}
+                    </li>
+                    <li class="list-group-item animate-repeat">
+                        <form ng-hide="editing.id" ng-submit="post({name: name})">
+                            <div class="input-group">
+                                <input type="text" class="form-control" ng-model="name" placeholder="Create New Todo Item">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-primary">
+                                        <i class="glyphicon glyphicon-floppy-disk"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                        <form ng-show="editing.id" ng-submit="editing = editing.put({name: editing.name}) ? '' : ''">
+                            <div class="input-group">
+                                <input type="text" class="form-control" ng-model="editing.name" placeholder="Edit Todo Item">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-warning" type="button" ng-click="editing = {}">
+                                        <i class="glyphicon glyphicon-floppy-remove"></i>
+                                    </button>
+                                    <button class="btn btn-primary">
+                                        <i class="glyphicon glyphicon-floppy-saved"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
