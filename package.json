@@ -1,7 +1,8 @@
 {
   "name": "castmydata-server",
   "version": "0.0.1",
-  "description": "Realtime database in one line.",
+  "description": "CastMyData Server",
+  "repository": "castmydata/server",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +10,7 @@
     "start": "node_modules/forever/bin/forever start index.js",
     "stop": "node_modules/forever/bin/forever stop index.js"
   },
-  "author": "",
+  "author": "Zulfa Juniadi <zulfajuniadi@gmail.com> (http://www.zulfajuniadi.com)",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.1",
