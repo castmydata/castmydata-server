@@ -7,16 +7,25 @@ NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
 // that's all folks!
 ```
 
-## Requirements
-- Redis Server [link](http://redis.io/)
-
-
 ## Features
 
 - Realtime client that syncs data with the server automatically using socket.io.
 - RESTful HTTP API
 
-## How to use
+## Requirements
+
+- Redis Server [link](http://redis.io/)
+- NodeJS & NPM
+- Git
+
+## Installation
+
+```bash
+$ git clone https://github.com/castmydata/server.git && cd server
+$ npm install
+```
+
+## How To Use
 
 run `npm start` to start the server in background. Then navigate to [http://localhost:8080](http://localhost:8080) to view a sample client.
 
@@ -54,12 +63,7 @@ API Configuration:
 
 All API calls to the server must have the `Authorization` header set to `Bearer xxx` where `xxx` is the `API_TOKEN` string in your server `.env` file.
 
-You will get a `403 HTTP Error` if the `Authorization` header is not sent or is invalid:
-
-
-```json
-"Forbidden"
-```
+> You will get a `403 HTTP Error` if the `Authorization` header is not sent or is  invalid
 
 All requests' URL will begin with `/db/{dbname}` where `{dbname}` is your database name. The database will be auto created.
 
@@ -67,7 +71,7 @@ Once you have CastMyData server running, you can test it here:
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/0a8e30c96e64022e8860#?env%5BCastMyData2%5D=W3sia2V5Ijoic2VydmVyIiwidmFsdWUiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJ0eXBlIjoidGV4dCIsImVuYWJsZWQiOnRydWUsImhvdmVyZWQiOmZhbHNlfSx7ImtleSI6InRva2VuIiwidmFsdWUiOiJCZWFyZXIgaWVpTEhJdk5DVm5lM0NZMkVpRFdLMDg5bFdvNlF1VTMiLCJ0eXBlIjoidGV4dCIsImVuYWJsZWQiOnRydWUsImhvdmVyZWQiOmZhbHNlfV0=)
 
-Be sure to change the server URL and Authorization token to match your environment.
+> Be sure to change the server URL and Authorization token to match your environment.
 
 ### GET /db/some-db
 
@@ -76,7 +80,8 @@ Returns all records in the database `some-db`.
 **Request:**
 
 ```bash
-$ curl -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" http://localhost:8080/db/some-db
+$ curl -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
+	http://localhost:8080/db/some-db
 ```
 
 **Success Response:**
@@ -105,7 +110,8 @@ Find record with id of `some-id` in the database `some-db`.
 **Request:**
 
 ```bash
-$ curl -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" http://localhost:8080/db/some-db/7cb5696c-af0d-48c4-b48c-dfd457509b5e
+$ curl -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
+	http://localhost:8080/db/some-db/7cb5696c-af0d-48c4-b48c-dfd457509b5e
 ```
 
 **Success Response:**
@@ -131,12 +137,16 @@ HTTP Code: 404
 
 ### POST /db/some-db
 
-Create new record inside `some-db`. If the data sent does not have an ID, the system will generate one for you.
+Create new record inside `some-db`. 
+
+> If the data sent does not have an id property, the system will generate one for you.
 
 **Request:**
 
 ```bash
-$ curl -X POST -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" http://localhost:8080/db/testendpoint -d "name=Bread"
+$ curl -X POST -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
+	-d "name=Bread" \
+	http://localhost:8080/db/testendpoint
 ```
 
 **Success Response:**
@@ -159,7 +169,9 @@ Updates a record in `some-db` by `some-id`.
 **Request:**
 
 ```bash
-$ curl -X PUT -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" http://localhost:8080/db/some-db/a92981dd-395e-488f-97a0-43398e6b0c61 -d "name=Fish"
+$ curl -X PUT -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
+	-d "name=Fish" \
+	http://localhost:8080/db/some-db/a92981dd-395e-488f-97a0-43398e6b0c61
 ```
 
 **Success Response:**
@@ -190,7 +202,8 @@ Deletes a record in `some-db` by `some-id`.
 **Request:**
 
 ```bash
-$ curl -X DELETE -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" http://localhost:8080/db/some-db/a92981dd-395e-488f-97a0-43398e6b0c61
+$ curl -X DELETE -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
+	http://localhost:8080/db/some-db/a92981dd-395e-488f-97a0-43398e6b0c61
 ```
 
 **Success Response:**
