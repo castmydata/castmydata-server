@@ -1,4 +1,4 @@
-var castmydata = require('./lib/castmydata');
+var castmydata = require('./castmydata');
 
 // The express instance is exposed 
 castmydata.api.use(function(req, res, next){
