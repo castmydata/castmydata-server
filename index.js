@@ -1,21 +1,21 @@
-var server = require('./lib/server');
+var castmydata = require('./lib/castmydata');
 
-// The express server is exposed 
-server.api.use(function(req, res, next){
+// The express castmydata is exposed 
+castmydata.api.use(function(req, res, next){
     // console.log('express middleware');
     next();
 });
 
-// And so is the socket.io server
-server.io.use(function(socket, next){
+// And so is the socket.io castmydata
+castmydata.io.use(function(socket, next){
     // console.log('socket.io middlware');
     next();
 });
 
-// And so is the http server
-server.http.on('connect', function(){
+// And so is the http castmydata
+castmydata.http.on('connect', function(){
   // do something
 });
 
 // OK LETS GO!
-server.start();
+castmydata.start();
