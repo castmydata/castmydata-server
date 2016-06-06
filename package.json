@@ -2,7 +2,7 @@
   "name": "castmydata-server",
   "version": "0.2.0",
   "description": "CastMyData Server",
-  "repository": "castmydata/server",
+  "repository": "castmydata/castmydata-server",
   "main": "castmydata.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
