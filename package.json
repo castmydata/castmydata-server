@@ -1,6 +1,6 @@
 {
   "name": "castmydata-server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CastMyData Server",
   "repository": "castmydata/castmydata-server",
   "main": "castmydata.js",
