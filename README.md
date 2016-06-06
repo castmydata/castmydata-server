@@ -5,14 +5,13 @@
 AngularJS 1:
 
 ```javascript
-	NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
-	// that's all folks!
+NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
 ```
 
 Or plain old Javascript:
 
 ```javascript
-	var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db');
+var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db');
 ``` 
 
 ## Features
