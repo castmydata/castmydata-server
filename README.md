@@ -2,30 +2,77 @@
 
 **Realtime database in one line.**
 
+AngularJS 1:
+
 ```javascript
-NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
-// that's all folks!
+	NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
+	// that's all folks!
 ```
+
+Or plain old Javascript:
+
+```javascript
+	var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db');
+``` 
 
 ## Features
 
 - Realtime client that syncs data with the server automatically using socket.io.
+- Broadcasting messages
 - RESTful HTTP API
 
 ## Requirements
 
-- Redis Server [link](http://redis.io/)
+- Redis Server: [link](http://redis.io/)
 - NodeJS & NPM
 - Git
 
 ## Installation
 
+As a package:
+
 ```bash
-$ git clone https://github.com/castmydata/server.git && cd server
+$ npm install --save castmydata-server
+```
+
+As a base project:
+
+```bash
+$ git clone https://github.com/castmydata/castmydata-server.git && cd castmydata-server
 $ npm install
 ```
 
+A `.castmydata.env` file will be created in your directory that has configuration for castmydata-server.
+
 ## How To Use
+
+As a package:
+
+```javascript
+var castmydata = require('./castmydata');
+
+// The express instance is exposed 
+castmydata.api.use(function(req, res, next){
+    // console.log('express middleware');
+    next();
+});
+
+// And so is the socket.io instance
+castmydata.io.use(function(socket, next){
+    // console.log('socket.io middlware');
+    next();
+});
+
+// And so is the http instance
+castmydata.http.on('connect', function(){
+  // do something
+});
+
+// OK LETS GO!
+castmydata.start();
+```
+
+As a base project:
 
 run `npm start` to start the server in background. Then navigate to [http://localhost:8080](http://localhost:8080) to view a sample client.
 
@@ -35,7 +82,7 @@ run `npm restart` to restart the server
 
 ## Configuration
 
-Configurations are set in the `.env` file
+Configurations are set in the `.castmydata.env` file
 
 Redis	Configuration:
 
@@ -46,6 +93,7 @@ Redis	Configuration:
 
 HTTP Configuration:
 
+- HTTP_PUBLIC_DIR: Serve files from the public path. e.g. true
 - HTTP_ORIGIN: CORS origin. e.g. \*:\* [more](http://stackoverflow.com/a/21711242)
 - HTTP_PORT: Binding port. e.g. 8080
 - HTTP_BIND_ADDR: Binding address. e.g. localhost
@@ -58,6 +106,10 @@ API Configuration:
 
 - API_ENABLED: Enable / disable RESTful API. e.g. true
 - API_TOKEN: Random string for RESTful API calls
+
+Others:
+
+- IGNORE_INDEX: Ignore index.html file inside your public directory. e.g. false
 
 ## RESTful API
 
@@ -146,7 +198,7 @@ Create new record inside `some-db`.
 ```bash
 $ curl -X POST -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
 	-d "name=Bread" \
-	http://localhost:8080/db/testendpoint
+	http://localhost:8080/db/some-db
 ```
 
 **Success Response:**
@@ -222,12 +274,44 @@ HTTP Code: 404
 "Not Found"
 ```
 
+### POST /db/some-db/broadcast
+
+Broadcasts a message to all clients connected to `some-db`
+
+**Request:**
+
+```bash
+$ curl -X POST -H "Authorization:Bearer ieiLHIvNCVne3CY2EiDWK089lWo6QuU3" \
+	-d "payload=Hello!" \
+	http://localhost:8080/db/testendpoint
+```
+
+**Success Response:**
+
+HTTP Code: 200
+
+```json
+"OK"
+```
+
+**Failed Response (Missing Payload Parameter):**
+
+HTTP Code: 400
+
+```json
+"Bad Request"
+```
+
 ## CastMyData Clients
 
 Javascript:
 
 - `castmydata.js` vanilla CastMyCode javascript client. Can be used on both client-side and server-side.
 - `ng-castmydata.js` Angular 1 extensions for CastMyCode client.
+
+PHP:
+
+Coming soon
 
 ## License
 
