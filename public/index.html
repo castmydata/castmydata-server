@@ -52,6 +52,17 @@
                 // create new connection
                 var endpoint = NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
 
+                $scope.broadcast = function(message) {
+                    //  broadcast this message
+                    endpoint.broadcast(message);
+                    $scope.message = '';
+                }
+
+                // on broadcast do this
+                endpoint.on('broadcast', function(message){
+                    $scope.received = message;
+                });
+
                 $scope.post = function(params) {
 
                     // send the data to the server
@@ -87,7 +98,22 @@
                     <dd>&lt;script type=&quot;text/javascript&quot; src=&quot;{{href}}ng-castmydata.min.js&quot;&gt;&lt;/script&gt;</dd>
                 </dl>
                 <hr>
-                <h2>Example: Todos</h2>
+                <h2>Example: Broadcasting</h2>
+                <p><a href="{{href}}" target="_blank">Open Another Tab</a></p>
+                <p>
+                    Last message received: <span ng-bind="received"></span>
+                </p>
+                <form ng-hide="editing.id" ng-submit="broadcast(message)">
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="message" placeholder="Broadcast">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary">
+                                <i class="glyphicon glyphicon-send"></i>
+                            </button>
+                        </span>
+                    </div>
+                </form>
+                <h2>Example: Database</h2>
                 <p><a href="{{href}}" target="_blank">Open Another Tab</a></p>
                 <ul class="list-group animate-container">
                     <li ng-repeat="record in records" class="list-group-item animate-repeat">

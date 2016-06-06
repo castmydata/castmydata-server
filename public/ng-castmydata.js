@@ -2,7 +2,7 @@
 
     angular.module('NgCastMyData', [])
         .value('CastMyDataServer', '')
-        .factory('NgCastMyDataEndpoint', ['CastMyDataServer', function(CastMyDataServer) {
+        .factory('NgCastMyDataEndpoint', ['CastMyDataServer', '$timeout', function(CastMyDataServer, $timeout) {
         
             var each = function(obj, callback) {
                 for (var key in obj) {
@@ -52,8 +52,10 @@
                         }
                     });
 
-                    this.on('records post put delete', function() {
-                        $scope.$digest();
+                    this.on('records post put delete broadcast', function() {
+                        $timeout(function(){
+                            $scope.$digest();
+                        });
                     });
 
                     return this;

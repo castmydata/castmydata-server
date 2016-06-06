@@ -168,6 +168,10 @@
             }
         });
 
+        socket.on('broadcast', function(data){
+            that.emit('broadcast', data.payload);
+        });
+
         socket.on('connect', function(){
             socket.emit('join', path);
         })
@@ -196,6 +200,14 @@
         this._socket.emit('delete', {
             path: this._socket.path,
             id: id
+        });
+        return this;
+    }
+
+    Endpoint.prototype.broadcast = function(payload) {
+        this._socket.emit('broadcast', {
+            path: this._socket.path,
+            payload: payload
         });
         return this;
     }
