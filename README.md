@@ -41,7 +41,16 @@ $ git clone https://github.com/castmydata/castmydata-server.git && cd castmydata
 $ npm install
 ```
 
+Using Docker:
+
+```bash
+docker run -d --name redis -p 6374 redis:3
+docker run -d -p 8080 --link redis --name castmydata-server zulfajuniadi/castmydata-server
+```
+
 A `.castmydata.env` file will be created in your directory that has configuration for castmydata-server.
+
+
 
 ## How To Use
 
