@@ -1,17 +1,23 @@
 # CastMyData Server
 
-**Realtime database in one line.**
+**Realtime database in a jiffy.**
 
 AngularJS 1:
 
 ```javascript
-NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
+NgCastMyDataEndpoint('testendpoint')
+    .subscribe()
+    .bindToScope($scope, 'records');
 ```
 
 Or plain old Javascript:
 
 ```javascript
-var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db');
+var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db')
+    .subscribe()
+    .on('records', function(records){
+        // do something with the records array
+    });
 ``` 
 
 ## Features
@@ -87,6 +93,26 @@ run `npm start` to start the server in background. Then navigate to [http://loca
 run `npm stop` to stop the running server
 
 run `npm restart` to restart the server
+
+## Data Storage
+
+By default CastMyData will use Redis as the default storage. You can change the data store to your preferred choice by supplying the `db` property during start:
+
+```js
+var SomeDatabase = require('some-database');
+castmydata.start({
+    db: new SomeDatabase()
+})
+```
+
+The database should implement all the following methods:
+- all
+- find
+- post
+- put
+- delete
+
+You can view the [redis database](https://github.com/castmydata/castmydata-server/blob/master/lib/db/redis-db.js) as an example implementation.
 
 ## Configuration
 
@@ -312,7 +338,7 @@ HTTP Code: 400
 
 ## CastMyData Clients
 
-Javascript:
+[Javascript](https://github.com/castmydata/castmydata-jsclient):
 
 - `castmydata.js` vanilla CastMyCode javascript client. Can be used on both client-side and server-side.
 - `ng-castmydata.js` Angular 1 extensions for CastMyCode client.
