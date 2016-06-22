@@ -8,8 +8,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/master/dist/castmydata.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/master/dist/ng-castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/36cb55dbb44477cbbc8f130cf139c45a370355ba/dist/castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/36cb55dbb44477cbbc8f130cf139c45a370355ba/dist/ng-castmydata.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
     <style>
         .list-group-item {
@@ -57,7 +57,9 @@
             .controller('TodosController', function($scope, NgCastMyDataEndpoint){
 
                 // create new connection
-                var endpoint = NgCastMyDataEndpoint('testendpoint').bindToScope($scope, 'records');
+                var endpoint = NgCastMyDataEndpoint('testendpoint')
+                    .subscribe()
+                    .bindToScope($scope, 'records');
 
                 $scope.broadcast = function(message) {
                     //  broadcast this message
@@ -96,8 +98,9 @@
 <pre>
 var endpoint = 
     NgCastMyDataEndpoint('testendpoint')
-    .bindToScope($scope, 'records');
-    // that's it!
+        .subscribe()
+        .bindToScope($scope, 'records');
+        // that's it!
 </pre>
                 <hr>
                 <h2>Clients</h2>
@@ -196,6 +199,7 @@ endpoint.on('broadcast', function(message){
 <pre>
 var endpoint = 
     NgCastMyDataEndpoint('testendpoint')
+    .subscribe()
     .bindToScope($scope, 'records');
 
 $scope.post = function(params) {
