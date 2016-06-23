@@ -1,11 +1,11 @@
 var should = require('should');
+var client = require('castmydata-jsclient');
 var request = require('request');
 var url = 'http://localhost:8080';
 var apiUrl = url + '/db/testendpoint/';
 var dotenv = require('dotenv').config({
     path: './.castmydata.env'
 });
-var client = require('../../castmydata-jsclient/src/castmydata');
 var endpoint;
 
 describe('CastMyData Tests', function() {

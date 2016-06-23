@@ -27,7 +27,7 @@
     "uuid": "^2.0.2"
   },
   "devDependencies": {
-    "castmydata-jsclient": "^2.0.1",
+    "castmydata-jsclient": "^2.0.3",
     "mocha": "^2.5.3",
     "request": "^2.72.0",
     "should": "^9.0.2",
