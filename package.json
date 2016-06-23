@@ -5,7 +5,7 @@
   "repository": "castmydata/castmydata-server",
   "main": "castmydata.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node_modules/mocha/bin/mocha",
     "postinstall": "node scripts/postinstall.js",
     "start": "node_modules/forever/bin/forever start index.js",
     "stop": "node_modules/forever/bin/forever stop index.js"
@@ -25,5 +25,12 @@
     "socket.io": "^1.4.6",
     "underscore": "^1.8.3",
     "uuid": "^2.0.2"
+  },
+  "devDependencies": {
+    "castmydata-jsclient": "^2.0.1",
+    "mocha": "^2.5.3",
+    "request": "^2.72.0",
+    "should": "^9.0.2",
+    "socket.io-client": "^1.4.6"
   }
 }
