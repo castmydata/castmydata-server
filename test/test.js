@@ -111,6 +111,13 @@ describe('CastMyData Tests', function() {
         });
     });
 
+    it('should be able to clear db', function(done){
+        api.get(apiUrl + 'clear', function(err, response){
+            response.statusCode.should.eql(200);
+            done();
+        });
+    });
+
     it('should be able to broadcast data', function(done){
         api.post(apiUrl + 'broadcast', function(err, response, body){
             response.statusCode.should.eql(200);
@@ -155,7 +162,7 @@ describe('CastMyData Tests', function() {
             data.id.should.eql(id);
             done();
         }).should.be.ok();
-        endpoint.put(id, {
+        endpoint.put({
             id: id,
             attributes: {
                 title: 'Buy Bread'
