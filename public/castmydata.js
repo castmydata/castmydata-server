@@ -1,1 +1,1 @@
-../../clients/js/src/castmydata.js
+../node_modules/castmydata-jsclient/src/castmydata.js

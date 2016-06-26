@@ -1,1 +1,1 @@
-../../clients/js/src/ng-castmydata.js
+../node_modules/castmydata-jsclient/src/ng-castmydata.js
