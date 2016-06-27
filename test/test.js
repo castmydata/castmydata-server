@@ -1,5 +1,5 @@
 var should = require('should');
-var client = require('castmydata-jsclient');
+var client = require('../public/castmydata');
 var request = require('request');
 var url = 'http://localhost:8080';
 var apiUrl = url + '/db/mochatest/';
@@ -53,15 +53,13 @@ describe('CastMyData Tests', function() {
         api.post(apiUrl, function(error, response, body) {
             var data = JSON.parse(body);
             response.statusCode.should.eql(201);
-            data.should.have.propertyByPath('response', 'attributes', 'title').eql('Buy Milk');
+            data.should.have.propertyByPath('response', 'title').eql('Buy Milk');
             data.should.have.propertyByPath('response', 'meta', 'createdAt').should.be.ok();
             data.response.id.should.be.ok();
             id = data.response.id;
             done();
         }).form({
-            attributes: {
-                title: 'Buy Milk'
-            }
+            title: 'Buy Milk'
         });
     });
 
@@ -79,7 +77,7 @@ describe('CastMyData Tests', function() {
         api.get(apiUrl + id, function(err, response, body) {
             var data = JSON.parse(body);
             response.statusCode.should.eql(200);
-            data.should.have.propertyByPath('response', 'attributes', 'title').eql('Buy Milk');
+            data.should.have.propertyByPath('response', 'title').eql('Buy Milk');
             data.should.have.propertyByPath('response', 'meta', 'createdAt').should.be.ok();
             data.response.id.should.be.eql(id);
             done();
@@ -90,14 +88,12 @@ describe('CastMyData Tests', function() {
         api.put(apiUrl + id, function(err, response, body) {
             var data = JSON.parse(body);
             response.statusCode.should.eql(200);
-            data.should.have.propertyByPath('response', 'attributes', 'title').eql('Buy Eggs');
+            data.should.have.propertyByPath('response', 'title').eql('Buy Eggs');
             data.should.have.propertyByPath('response', 'meta', 'updatedAt').should.be.ok();
             data.response.id.should.be.eql(id);
             done();
         }).form({
-            attributes: {
-                title: 'Buy Eggs'
-            }
+            title: 'Buy Eggs'
         });
     });
 
@@ -129,31 +125,21 @@ describe('CastMyData Tests', function() {
 
     it('should be able to subscribe', function(done) {
         this.slow(2000);
-        endpoint.subscribe().should.be.ok();
-
-        function handle(data) {
-            data.should.be.an.Array();
-            endpoint.off('sync', handle).should.be.ok();
+        endpoint.subscribe(function(){
             done();
-        }
-        endpoint.on('sync', handle).should.be.ok();
+        }).should.be.ok();
     });
 
     var id;
     it('should be able to create a record', function(done) {
-        function handle(data) {
-            data.should.have.propertyByPath('attributes', 'title').eql('Buy Eggs');
-            data.should.have.propertyByPath('meta', 'createdAt').should.be.ok();
-            data.id.should.be.ok();
-            id = data.id;
-            endpoint.off('post', handle).should.be.ok();
-            done();
-        }
-        endpoint.on('post', handle);
         endpoint.post({
-            attributes: {
-                title: 'Buy Eggs'
-            }
+            title: 'Buy Eggs'
+        }, function(model){
+            model.should.have.propertyByPath('title').eql('Buy Eggs');
+            model.should.have.propertyByPath('meta', 'createdAt').should.be.ok();
+            model.id.should.be.ok();
+            id = model.id;
+            done();
         });
     });
 
@@ -167,7 +153,7 @@ describe('CastMyData Tests', function() {
     var query;
     it('should be able to query an endpoint', function(done) {
         query = endpoint.where(function(model) {
-            return model.attributes.title == 'Buy Eggs';
+            return model.title == 'Buy Eggs';
         });
         query.models.length.should.be.eql(1);
         query.models[0].id.should.eql(id);
@@ -176,71 +162,56 @@ describe('CastMyData Tests', function() {
 
     var id2;
     it('should be able to update query models when a new record is created', function(done) {
-        function handle(data) {
-            query.models.length.should.be.eql(2);
-            id2 = data.id;
-            endpoint.off('post', handle).should.be.ok();
-            done();
-        }
-        query.on('post', handle);
         endpoint.post({
-            attributes: {
-                title: 'Buy Eggs'
-            }
+            title: 'Buy Eggs'
+        }, function(model){
+            query.models.length.should.be.eql(2);
+            id2 = model.id;
+            done();
         });
     });
 
     it('should be able to update a record by id', function(done) {
-        function handle(data) {
-            data.should.have.propertyByPath('attributes', 'title').eql('Buy Bread');
-            data.should.have.propertyByPath('meta', 'updatedAt').should.be.ok();
-            data.id.should.eql(id);
-            query.models.length.should.eql(1);
-            endpoint.off('put', handle).should.be.ok();
-            done();
-        }
-        endpoint.on('put', handle).should.be.ok();
         endpoint.put(id, {
-            attributes: {
-                title: 'Buy Bread'
-            }
+            title: 'Buy Bread'
+        }, function(model){
+            model.should.have.property('title').eql('Buy Bread');
+            model.should.have.propertyByPath('meta', 'updatedAt').should.be.ok();
+            model.id.should.eql(id);
+            query.models.length.should.be.eql(1);
+            done();
         }).should.be.ok();
     });
 
     it('should be able to delete a record by id', function(done) {
-        function handleEndpoint(data) {
-            data.should.have.propertyByPath('attributes').should.not.have.property('name');
-            data.should.have.propertyByPath('meta', 'deletedAt').should.be.ok();
-            data.id.should.eql(id2);
-            endpoint.off('delete', handleEndpoint);
-        }
-
-        function handleQuery(data) {
+        endpoint.delete(id2, function(model){
+            model.should.not.have.property('title');
+            model.should.have.propertyByPath('meta', 'deletedAt').should.be.ok();
+            model.id.should.eql(id2);
             query.models.length.should.eql(0);
-            query.off('delete', handleQuery).should.be.ok();
             done();
-        }
-        endpoint.on('delete', handleEndpoint).should.be.ok();
-        query.on('delete', handleQuery).should.be.ok();
-        endpoint.delete(id2).should.be.ok();
+        }).should.be.ok();
     });
 
     it('should be able to send broadcasts', function(done) {
-        endpoint.on('broadcast', function(message) {
-            message.should.have.property('payload').eql('Hello World!');
+        endpoint.broadcast('Hello World!', function(data){
+            data.should.be.eql('Hello World!');
             done();
-        }).should.be.ok();
-        endpoint.broadcast({
-            payload: 'Hello World!'
         }).should.be.ok();
     });
 
     it('should be able to clear db', function(done) {
-        endpoint.on('clear', function() {
+        endpoint.clear(function(){
             endpoint.models.length.should.eql(0);
             done();
         }).should.be.ok();
-        endpoint.clear().should.be.ok();
+    });
+
+    it('should be able to unsubscribe', function(done) {
+        endpoint.unsubscribe(function(){
+            endpoint.models.length.should.eql(0);
+            done();
+        }).should.be.ok();
     });
 
     it('should be able to close connection', function(done) {
