@@ -59,16 +59,17 @@
                 // create new connection
                 var endpoint = window.endpoint = NgCastMyDataEndpoint('testendpoint')
                     .subscribe()
+                    .listen('some-broadcast-channel')
                     .bindToScope($scope, 'records');
 
                 $scope.broadcast = function(message) {
                     //  broadcast this message
-                    endpoint.broadcast(message);
+                    endpoint.broadcast('some-broadcast-channel', message);
                     $scope.message = '';
                 }
 
                 // on broadcast do this
-                endpoint.on('broadcast', function(message){
+                endpoint.on('broadcast:some-broadcast-channel', function(message){
                     $scope.received = message;
                 });
 
