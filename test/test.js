@@ -119,6 +119,7 @@ describe('CastMyData Tests', function() {
             response.statusCode.should.eql(200);
             done();
         }).form({
+            channel: 'some-channel',
             payload: 'Hello World',
         });
     });
@@ -128,6 +129,30 @@ describe('CastMyData Tests', function() {
         endpoint.subscribe(function(){
             done();
         }).should.be.ok();
+    });
+
+    it('should be able to listen to a channel', function(done) {
+        endpoint.listen('some-channel-2');
+        endpoint.listen('some-channel-1', function(channel) {
+            channel.should.eql('some-channel-1');
+            done();
+        });
+    });
+
+    it('should be able to send broadcasts', function(done) {
+        endpoint.broadcast('some-channel-1', 'Hello World!', function(data){
+            data.channel.should.be.eql('some-channel-1');
+            data.payload.should.be.eql('Hello World!');
+            done();
+        }).should.be.ok();
+    });
+
+    it('should be able to unlisten to a channel', function(done) {
+        endpoint.unlisten('some-channel-2');
+        endpoint.unlisten('some-channel-1', function(channel) {
+            channel.should.eql('some-channel-1');
+            done();
+        });
     });
 
     var id;
@@ -189,13 +214,6 @@ describe('CastMyData Tests', function() {
             model.should.have.propertyByPath('meta', 'deletedAt').should.be.ok();
             model.id.should.eql(id2);
             query.models.length.should.eql(0);
-            done();
-        }).should.be.ok();
-    });
-
-    it('should be able to send broadcasts', function(done) {
-        endpoint.broadcast('Hello World!', function(data){
-            data.should.be.eql('Hello World!');
             done();
         }).should.be.ok();
     });
