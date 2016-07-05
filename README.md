@@ -25,6 +25,8 @@ var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db')
 - Realtime client that syncs data with the server automatically using socket.io.
 - Broadcasting messages
 - RESTful HTTP API
+- Server side access control list
+- Middleware
 
 ## Requirements
 
@@ -96,6 +98,78 @@ run `npm stop` to stop the running server
 
 run `npm restart` to restart the server
 
+## Access Control Lists
+
+ACL can be configured during the startup of the server as so:
+
+```javascript
+castmydata.start({
+  acl: {
+    'some-db': {
+      put: function(oldData, newData, callback) {
+      	// only allow author to update own record
+      	if(oldData.user.id != this.socket.handshake.session.user.id) {
+          return callback(new Error('Invalid Request'));
+        }
+        callback(null);
+      },
+    }
+  }
+});
+```
+
+ACL callbacks provided are:
+
+- sync => (callback)
+- post => (newData, callback)
+- put => (oldData, newData, callback)
+- delete => (oldData, callback)
+- clear => (callback)
+- listen => (channel, callback)
+- unlisten => (channel, callback)
+- broadcast => (request, callback)
+
+To deny an action, call the callback with an Error argument as: `callback(new Error('Some Error'))`. If the callback is called without a first argument, the request will be processed.
+
+In the event of the ACL error, the record will be reverted to it's original state.
+
+## Middleware
+
+CastMyData supports middleware that can bind to both the http server and socket.io server.
+
+The middleware must export an `init` function that takes  two arguments: http and io.
+
+Sample middleware:
+
+```javascript
+var Session = require("express-session");
+var RedisStore = require('connect-redis')(Session);
+var session = Session({
+  store: new RedisStore(),
+  secret: 'some random string',
+  resave: true,
+  saveUninitialized: true
+});
+sharedsession = require("express-socket.io-session");
+
+function init(http, io) {
+  http.api.use(session);
+  io.use(sharedsession(session, {
+    autoSave: true
+  }));
+}
+
+module.exports = {
+  init: init
+}
+```
+
+Sample usage:
+
+```javascript
+castmydata.use(require('./some-middleware'));
+```
+
 ## Data Storage
 
 By default CastMyData will use Redis as the default storage. You can change the data store to your preferred choice by supplying the `db` property during start:
@@ -108,11 +182,13 @@ castmydata.start({
 ```
 
 The database should implement all the following methods:
+
 - all
 - find
 - post
 - put
 - delete
+- clear
 
 You can view the [redis database](https://github.com/castmydata/castmydata-server/blob/master/lib/db/redis-db.js) as an example implementation.
 
@@ -137,6 +213,8 @@ HTTP Configuration:
 - HTTPS_CERT_FILE: Path to SSL certificate. e.g. ./certs/server.crt
 - HTTPS_CERT_KEY: Path to SSL certificate private key. e.g. ./certs/server.key
 - HTTPS_KEY_PASS: Password for private key
+- REDIR_TO_HTTPS: Fire up a HTTP server to redirect traffic to HTTPS
+- REDIR_TO_HTTPS_PORT: The HTTP redirect server port
 
 API Configuration:
 
