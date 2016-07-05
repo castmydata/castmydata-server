@@ -38,6 +38,7 @@ As a package:
 
 ```bash
 $ npm install --save castmydata-server
+$ npm run setup
 ```
 
 As a base project:
@@ -45,6 +46,7 @@ As a base project:
 ```bash
 $ git clone https://github.com/castmydata/castmydata-server.git && cd castmydata-server
 $ npm install
+$ npm run setup
 ```
 
 Using Docker:

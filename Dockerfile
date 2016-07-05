@@ -7,6 +7,6 @@ RUN npm install
 COPY lib lib
 COPY public public
 COPY .env.docker.example .env.example
-RUN npm run postinstall
+RUN npm run setup
 EXPOSE 8080
 CMD ["node_modules/forever/bin/forever", "index.js"]
