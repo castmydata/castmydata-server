@@ -1,12 +1,22 @@
 var should = require('should');
-var client = require('../public/castmydata');
 var request = require('request');
+var fs = require('fs');
+var path = require('path');
+var rmdir = require('rmdir-sync');
 var url = 'http://localhost:8080';
 var apiUrl = url + '/db/mochatest/';
 var dotenv = require('dotenv').config({
     path: './.castmydata.env'
 });
 var endpoint;
+
+// cleanup localstorage
+var localStoragePath = path.join(__dirname, '..', 'scratch');
+rmdir(localStoragePath);
+fs.mkdirSync(localStoragePath);
+
+// require castmydata client
+var client = require('../public/castmydata');
 
 describe('CastMyData Tests', function() {
 
