@@ -1,7 +1,3 @@
-var dotenv = require('dotenv').config({
-    path: './.castmydata.env'
-});
-
 // Require api
 var http = require('./lib/api')();
 

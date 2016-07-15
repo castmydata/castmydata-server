@@ -1,3 +1,7 @@
+var dotenv = require('dotenv').config({
+    path: './.castmydata.env'
+});
+
 var castmydata = require('./castmydata');
 
 // The express instance is exposed 
