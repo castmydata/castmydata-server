@@ -183,12 +183,13 @@ castmydata.start({
 
 The database should implement all the following methods:
 
-- all
-- find
-- post
-- put
-- delete
-- clear
+- all => function(tableName, callback)
+- where => function(tableName, filter, callback) // filter is based on [siftJS](https://github.com/crcn/sift.js)
+- find => function(tableName, id, callback)
+- post => function(tableName, record, callback)
+- put => function(tableName, id, record, callback)
+- delete => function(tableName, id, callback)
+- clear => function(tableName, callback)
 
 You can view the [redis database](https://github.com/castmydata/castmydata-server/blob/master/lib/db/redis-db.js) as an example implementation.
 
