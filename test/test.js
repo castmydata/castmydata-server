@@ -9,6 +9,7 @@ var dotenv = require('dotenv').config({
     path: './.castmydata.env'
 });
 var endpoint;
+var castmydata;
 
 // cleanup localstorage
 var localStoragePath = path.join(__dirname, '..', 'scratch');
@@ -20,8 +21,6 @@ var client = require('../public/castmydata');
 
 describe('CastMyData Tests', function() {
 
-    var castmydata = require('../castmydata');
-
     this.timeout(5000);
 
     var api = request.defaults({
@@ -29,17 +28,17 @@ describe('CastMyData Tests', function() {
             'content-type': 'application/json',
             'Authorization': 'Bearer ' + process.env.API_TOKEN
         }
-    })
+    });
 
     before(function(done) {
+        castmydata = (new(require('../lib/castmydata'))()).startup(done);
         endpoint = new client.Endpoint(url, 'mochatest');
-        castmydata.start(done);
     });
 
     after(function(done) {
         this.timeout = 10000;
         endpoint.close();
-        castmydata.stop(done);
+        castmydata.shutdown(done);
     });
 
     it('should be able to get root', function(done) {
@@ -136,7 +135,7 @@ describe('CastMyData Tests', function() {
 
     it('should be able to subscribe', function(done) {
         this.slow(2000);
-        endpoint.subscribe(function(){
+        endpoint.subscribe(function() {
             done();
         }).should.be.ok();
     });
@@ -150,7 +149,7 @@ describe('CastMyData Tests', function() {
     });
 
     it('should be able to send broadcasts', function(done) {
-        endpoint.broadcast('some-channel-1', 'Hello World!', function(data){
+        endpoint.broadcast('some-channel-1', 'Hello World!', function(data) {
             data.channel.should.be.eql('some-channel-1');
             data.payload.should.be.eql('Hello World!');
             done();
@@ -165,11 +164,10 @@ describe('CastMyData Tests', function() {
         });
     });
 
-    var id;
     it('should be able to create a record', function(done) {
         endpoint.post({
             title: 'Buy Eggs'
-        }, function(model){
+        }, function(model) {
             model.should.have.propertyByPath('title').eql('Buy Eggs');
             model.should.have.propertyByPath('meta', 'createdAt').should.be.ok();
             model.id.should.be.ok();
@@ -187,8 +185,8 @@ describe('CastMyData Tests', function() {
 
     var query;
     it('should be able to query an endpoint', function(done) {
-        query = endpoint.where(function(model) {
-            return model.title == 'Buy Eggs';
+        query = endpoint.where({
+            'model.title': 'Buy Eggs'
         });
         query.models.length.should.be.eql(1);
         query.models[0].id.should.eql(id);
@@ -199,7 +197,7 @@ describe('CastMyData Tests', function() {
     it('should be able to update query models when a new record is created', function(done) {
         endpoint.post({
             title: 'Buy Eggs'
-        }, function(model){
+        }, function(model) {
             query.models.length.should.be.eql(2);
             id2 = model.id;
             done();
@@ -209,7 +207,7 @@ describe('CastMyData Tests', function() {
     it('should be able to update a record by id', function(done) {
         endpoint.put(id, {
             title: 'Buy Bread'
-        }, function(model){
+        }, function(model) {
             model.should.have.property('title').eql('Buy Bread');
             model.should.have.propertyByPath('meta', 'updatedAt').should.be.ok();
             model.id.should.eql(id);
@@ -219,7 +217,7 @@ describe('CastMyData Tests', function() {
     });
 
     it('should be able to delete a record by id', function(done) {
-        endpoint.delete(id2, function(model){
+        endpoint.delete(id2, function(model) {
             model.should.not.have.property('title');
             model.should.have.propertyByPath('meta', 'deletedAt').should.be.ok();
             model.id.should.eql(id2);
@@ -229,14 +227,14 @@ describe('CastMyData Tests', function() {
     });
 
     it('should be able to clear db', function(done) {
-        endpoint.clear(function(){
+        endpoint.clear(function() {
             endpoint.models.length.should.eql(0);
             done();
         }).should.be.ok();
     });
 
     it('should be able to unsubscribe', function(done) {
-        endpoint.unsubscribe(function(){
+        endpoint.unsubscribe(function() {
             endpoint.models.length.should.eql(0);
             done();
         }).should.be.ok();

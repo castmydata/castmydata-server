@@ -2,23 +2,21 @@
 
 **Realtime database in a jiffy.**
 
-AngularJS 1:
+## Table Of Contents
 
-```javascript
-NgCastMyDataEndpoint('testendpoint')
-    .subscribe()
-    .bindToScope($scope, 'records');
-```
-
-Or plain old Javascript:
-
-```javascript
-var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db')
-    .subscribe()
-    .on('records', function(records){
-        // do something with the records array
-    });
-``` 
+1. [Features](#features)
+2. [Available Plugins](#available-plugins)
+3. [Available Clients](#available-clients)
+4. [Requirements](#requirements)
+5. [Installation](#installation)
+6. [How To Use](#how-to-use)
+8. [Plugin](#plugin)
+7. [Access Control Lists](#access-control-lists)
+9. [Data Storage](#data-storage)
+10. [Configuration](#configuration)
+11. [RESTful API](#restful-api)
+12. [Testing](#testing)
+13. [License](#license)
 
 ## Features
 
@@ -26,7 +24,16 @@ var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db')
 - Broadcasting messages
 - RESTful HTTP API
 - Server side access control list
-- Middleware
+- Plugin System
+
+## Available Plugins
+
+1. [MongoDB Backend for CastMyData](https://github.com/castmydata.castmydata-mongodb)
+
+## Available Clients
+
+1. [Javascript Client for CastMyData](https://github.com/castmydata/castmydata-jsclient)
+
 
 ## Requirements
 
@@ -34,12 +41,14 @@ var endpoint = new CastMyData.Endpoint('http://localhost:8080/', 'some-db')
 - NodeJS & NPM
 - Git
 
+
 ## Installation
 
 As a package:
 
 ```bash
 $ npm install --save castmydata-server
+$ node node_modules/castmydata-server/setup
 $ npm run setup
 ```
 
@@ -67,10 +76,31 @@ A `.castmydata.env` file will be created in your directory that has configuratio
 As a package:
 
 ```javascript
-var castmydata = require('./castmydata');
+// Load environment variables
+var dotenv = require('dotenv').config({
+    path: './.castmydata.env'
+});
+
+var CastMyData = require('castmydata-server');
+var castmydata = new CastMyData({
+    // options
+});
+
+
+// Load plugins
+// Plugins are loaded according to 
+castmydata.register({
+    register: function(app, done) {
+        // app.http: CastMyData http server
+        // app.express: CastMyData api server (express app)
+        // app.io: CastMyData socket.io server
+        // Do Something Here
+        done(); // Call done when plugin has been loaded
+    }
+});
 
 // The express instance is exposed 
-castmydata.api.use(function(req, res, next){
+castmydata.express.use(function(req, res, next){
     // console.log('express middleware');
     next();
 });
@@ -98,17 +128,55 @@ run `npm stop` to stop the running server
 
 run `npm restart` to restart the server
 
-## Access Control Lists
 
-ACL can be configured during the startup of the server as so:
+## Plugin
+
+Plugins are a core feature in CastMyData. In fact, most of the application logic behind CastMyData is [implemented as plugins](https://github.com/castmydata/castmydata-server/tree/master/lib/plugins).
+
+CastMyData features a plugin system that are loaded during the application instantiation. Your custom plugins will be after all the core plugins has been loaded. This means that you;ll have access to express, socket.io, pubsub, nodejs http instance and all other goodies that's running in the background.
+
+The plugin should have three functions: `register`, `startup`, and `shutdown`.
+
+Sample plugin:
 
 ```javascript
-castmydata.start({
+// SamplePlugin.js
+function SamplePlugin(app){
+    this.app = app;
+};
+// Code executed when the plugin is first instantiated
+SamplePlugin.prototype.register = function(app) {}
+// Code executed when castmydata.start() is called
+SamplePlugin.prototype.startup = function(app, done) {
+    done();
+}
+// Code executed when castmydata.shutdown() is called
+SamplePlugin.prototype.shutdown = function(app, done) {
+    done();
+}
+
+module.exports = SamplePlugin;
+```
+
+Sample usage:
+
+```javascript
+var castmydata = new CastMyData();
+var SamplePlugin = require('sample-plugin');
+castmydata.register(new SamplePlugin(castmydata));
+```
+
+## Access Control Lists
+
+ACL can be configured during the instantiation of the server as so:
+
+```javascript
+new castmydata({
   acl: {
     'some-db': {
       put: function(oldData, newData, callback) {
       	// only allow author to update own record
-      	if(oldData.user.id != this.socket.handshake.session.user.id) {
+      	if(oldData.user.id != this.user().id) {
           return callback(new Error('Invalid Request'));
         }
         callback(null);
@@ -133,56 +201,23 @@ To deny an action, call the callback with an Error argument as: `callback(new Er
 
 In the event of the ACL error, the record will be reverted to it's original state.
 
-## Middleware
-
-CastMyData supports middleware that can bind to both the http server and socket.io server.
-
-The middleware must export an `init` function that takes  two arguments: http and io.
-
-Sample middleware:
-
-```javascript
-var Session = require("express-session");
-var RedisStore = require('connect-redis')(Session);
-var session = Session({
-  store: new RedisStore(),
-  secret: 'some random string',
-  resave: true,
-  saveUninitialized: true
-});
-sharedsession = require("express-socket.io-session");
-
-function init(http, io) {
-  http.api.use(session);
-  io.use(sharedsession(session, {
-    autoSave: true
-  }));
-}
-
-module.exports = {
-  init: init
-}
-```
-
-Sample usage:
-
-```javascript
-castmydata.use(require('./some-middleware'));
-```
-
 ## Data Storage
 
 By default CastMyData will use Redis as the default storage. You can change the data store to your preferred choice by supplying the `db` property during start:
 
 ```js
 var SomeDatabase = require('some-database');
-castmydata.start({
-    db: new SomeDatabase()
-})
+var castmydata = new CastMyData({
+    db: SomeDatabase
+});
 ```
+
+The database should be a Javascript function that will be instantiated during the app registering.
 
 The database should implement all the following methods:
 
+- register => function(app)
+- startup => function(app, callback)
 - all => function(tableName, callback)
 - where => function(tableName, filter, callback) // filter is based on [siftJS](https://github.com/crcn/sift.js)
 - find => function(tableName, id, callback)
@@ -190,14 +225,17 @@ The database should implement all the following methods:
 - put => function(tableName, id, record, callback)
 - delete => function(tableName, id, callback)
 - clear => function(tableName, callback)
+- shutdown => function(app, callback)
 
 You can view the [redis database](https://github.com/castmydata/castmydata-server/blob/master/lib/db/redis-db.js) as an example implementation.
 
 ## Configuration
 
-Configurations are set in the `.castmydata.env` file
+### Configuration using .env file
 
-Redis	Configuration:
+Configurations are primarily set within the `.castmydata.env` file
+
+Redis Configuration:
 
 - REDIS_HOST: Your Redis host. e.g. 127.0.0.1
 - REDIS_PORT: Your Redis port. e.g. 6379
@@ -225,6 +263,65 @@ API Configuration:
 Others:
 
 - IGNORE_INDEX: Ignore index.html file inside your public directory. e.g. false
+
+
+### Configuration using the `options.config` argument
+
+Alternatively, configurations can be overriddedn via the app `options.config` argument:
+
+```javascript
+var castmydata = new CastMyData({
+    config: {
+        // this will override REDIS_HOST value set 
+        // in the .castmydata.env file
+        REDIS_HOST: '127.0.0.1' ,
+        facebook: {
+            appId: 'xxxxxxx',
+            accessToken: '',
+        }
+    }
+})
+```
+
+### Get & set application config
+
+The application configuration can be accessed via the `app.get` method. This may be useful if you want to access your configuration via a plugin or database. The `app.get` method takes two arguments:
+
+1. The config key you want to access.
+2. A default value should the config key return a falsy value
+
+```javascript
+// some plugin startup function
+SomePlugin.prototype.startup = function(app, done) {
+    var host = app.get('REDIS_HOST', '127.0.0.1');
+    var port = app.get('REDIS_PORT', 6379); // returns 6379 as default
+}
+```
+
+To access nested keys, you may use dot notation:
+
+```javascript
+FacebookAuth.prototype.startup = function(app, done) {
+    var appId = app.get('facebook.appId'); // returns 'xxxxxxx'
+}
+```
+
+
+You are able to change the application configs via the `app.set`:
+
+```javascript
+
+FacebookAuth.prototype.startup = function(app, done) {
+    app.set('facebook.accessToken', 'yyyyyyy');
+    
+    console.log(app.get('facebook'));
+    // returns {
+    //    appId: "xxxxxxx",
+    //    accessToken: "yyyyyyy"
+    // }
+} 
+```
+
 
 ## RESTful API
 
@@ -417,16 +514,38 @@ HTTP Code: 400
 "Bad Request"
 ```
 
-## CastMyData Clients
+## Testing
 
-[Javascript](https://github.com/castmydata/castmydata-jsclient):
-
-- `castmydata.js` vanilla CastMyCode javascript client. Can be used on both client-side and server-side.
-- `ng-castmydata.js` Angular 1 extensions for CastMyCode client.
-
-PHP:
-
-Coming soon
+```bash
+$ npm test
+  
+  CastMyData Tests
+  
+    ✓ should be able to get root (42ms)
+    ✓ should deny api request without auth token
+    ✓ should be able to create a new record (40ms)
+    ✓ should be able list all records
+    ✓ should be able to get a record by id
+    ✓ should be able to update a record by id
+    ✓ should be able to delete a record by id
+    ✓ should be able to clear db
+    ✓ should be able to broadcast data
+    ✓ should be able to subscribe
+    ✓ should be able to listen to a channel
+    ✓ should be able to send broadcasts
+    ✓ should be able to unlisten to a channel
+    ✓ should be able to create a record
+    ✓ should be able to find a record by id
+    ✓ should be able to query an endpoint
+    ✓ should be able to update query models when a new record is created
+    ✓ should be able to update a record by id
+    ✓ should be able to delete a record by id
+    ✓ should be able to clear db
+    ✓ should be able to unsubscribe
+    ✓ should be able to close connection
+    
+  22 passing (1s)
+```
 
 ## License
 

@@ -3,9 +3,9 @@
   "version": "4.2.1",
   "description": "CastMyData Server",
   "repository": "castmydata/castmydata-server",
-  "main": "castmydata.js",
+  "main": "lib/castmydata.js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha",
+    "test": "node_modules/mocha/bin/mocha --check-leaks -b",
     "setup": "node scripts/setup.js",
     "start": "node_modules/forever/bin/forever start index.js",
     "stop": "node_modules/forever/bin/forever stop index.js"
@@ -19,6 +19,7 @@
     "dotenv": "^2.0.0",
     "express": "^4.13.4",
     "forever": "^0.15.2",
+    "getobject": "^0.1.0",
     "hiredis": "^0.4.1",
     "randomstring": "^1.1.5",
     "redis": "^2.6.0-2",
@@ -29,7 +30,7 @@
     "uuid": "^2.0.2"
   },
   "devDependencies": {
-    "castmydata-jsclient": "^4.0.6",
+    "castmydata-jsclient": "castmydata/castmydata-jsclient",
     "mocha": "^2.5.3",
     "request": "^2.72.0",
     "rmdir-sync": "^1.0.1",

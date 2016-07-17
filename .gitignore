@@ -2,5 +2,4 @@ npm-debug.log
 node_modules
 .castmydata.env
 .DS_Store
-publish
 scratch
